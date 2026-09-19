@@ -120,12 +120,12 @@ def main(argv: list[str] | None = None) -> int:
         urls = [t for t in re.split(r"[\s,]+", sys.stdin.read()) if t]
     urls = [u for u in urls if u.startswith(("http://", "https://"))]
     if not urls:
-        print("bias-hunter: no http(s) URLs given", file=sys.stderr)
+        print("ai-bias: no http(s) URLs given", file=sys.stderr)
         return 1
     try:
         asof = dt.date.fromisoformat(a.asof) if a.asof else dt.datetime.now(dt.UTC).date()
     except ValueError:
-        print("bias-hunter: --asof must be YYYY-MM-DD", file=sys.stderr)
+        print("ai-bias: --asof must be YYYY-MM-DD", file=sys.stderr)
         return 1
     r = analyse(asof, urls)
     print(json.dumps(r, ensure_ascii=False, indent=1) if a.json else render(r))

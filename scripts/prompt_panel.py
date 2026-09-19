@@ -21,7 +21,7 @@ import urllib.request
 
 PROMPTS_URL = "https://ai-bias.docenty.ai/free/prompts.json"
 FEED_URL = "https://ai-bias.docenty.ai/free/latest.json"
-UPGRADE_URL = "https://ai-bias.docenty.ai#inquiry"
+UPGRADE_URL = "https://ai-bias.docenty.ai/#inquiry?utm_source=skill&utm_medium=cli"
 LANGS = ("ko", "en", "ja")
 TIMEOUT = 10
 DISCLAIMER = "Measurement of answer overlap, not investment advice. 측정치이지 투자 조언이 아닙니다."
@@ -32,11 +32,11 @@ def _fetch(url: str | None, path: str | None, what: str) -> dict:
         if path:
             with open(path, encoding="utf-8") as f:
                 return json.load(f)
-        req = urllib.request.Request(url, headers={"User-Agent": "bias-hunter-skill/0.1"})
+        req = urllib.request.Request(url, headers={"User-Agent": "ai-bias-skill/0.2"})
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
             return json.load(r)
     except (urllib.error.URLError, OSError, TimeoutError, json.JSONDecodeError) as e:
-        print(f"bias-hunter: {what} unreachable or invalid ({path or url}): {e}", file=sys.stderr)
+        print(f"ai-bias: {what} unreachable or invalid ({path or url}): {e}", file=sys.stderr)
         print("Retry later, or pass --file / --feed-file with a saved copy.", file=sys.stderr)
         sys.exit(2)
 

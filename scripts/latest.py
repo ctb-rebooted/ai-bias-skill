@@ -1,23 +1,32 @@
 #!/usr/bin/env python3
-"""Bias Hunter — daily "what the models said" digest for Korean equities (free, delayed public feed).
+"""Bias Hunter (ai-bias) — daily "what the models said" digest for Korean equities (free, delayed public feed).
 
     python latest.py                      # compact digest from https://ai-bias.docenty.ai/free/latest.json
     python latest.py --ticker 042700      # one name's row + fixed disclaimer
     python latest.py --json               # raw feed
     python latest.py --file latest.json   # offline / test
+    python latest.py --live [--ticker X]  # same-morning paid feed; needs env AI_BIAS_API_KEY (exit 3 if missing)
 
-Stdlib only. Exit 2 when the feed is unreachable or malformed. Output is measurement, never a recommendation.
+Stdlib only. Exit 2 when the feed is unreachable or malformed; exit 3 when --live is asked without a key.
+Output is measurement, never a recommendation. No telemetry: the only network calls are the feed GETs shown above.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
 FEED_URL = "https://ai-bias.docenty.ai/free/latest.json"
 UPGRADE_URL = "https://ai-bias.docenty.ai#inquiry"
+UPGRADE_URL_UTM = "https://ai-bias.docenty.ai/#inquiry?utm_source=skill&utm_medium=cli"
+LIVE_ENDPOINT = "https://ai-bias.docenty.ai/api/v1/latest"
+API_KEY_ENV = "AI_BIAS_API_KEY"
+TRIAL_DAYS = 60
+LIVE_NOT_ENABLED = "Live endpoint not yet enabled for this key — your trial request is queued. Falling back to the free feed."
 DISCLAIMER = ("Measurement of what public LLMs said on the data date shown, not investment advice. "
               "No recommendation, no target price. 측정치이지 투자 조언이 아닙니다.")
 TIMEOUT = 10
@@ -29,7 +38,7 @@ def load_feed(url: str | None, path: str | None) -> dict:
             with open(path, encoding="utf-8") as f:
                 data = json.load(f)
         else:
-            req = urllib.request.Request(url or FEED_URL, headers={"User-Agent": "bias-hunter-skill/0.1"})
+            req = urllib.request.Request(url or FEED_URL, headers={"User-Agent": "ai-bias-skill/0.2"})
             with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
                 data = json.load(r)
     except (urllib.error.URLError, OSError, TimeoutError) as e:
@@ -42,9 +51,34 @@ def load_feed(url: str | None, path: str | None) -> dict:
 
 
 def _fail(src: str | None, err: object) -> None:
-    print(f"bias-hunter: feed unreachable or invalid ({src}): {err}", file=sys.stderr)
+    print(f"ai-bias: feed unreachable or invalid ({src}): {err}", file=sys.stderr)
     print("Retry later, or pass --file <saved latest.json>. Do not guess values.", file=sys.stderr)
     sys.exit(2)
+
+
+def upgrade_info(d: dict) -> dict:
+    """Merge feed-provided upgrade block with defaults (older feeds may lack it)."""
+    u = {"url": UPGRADE_URL_UTM, "trial_days": TRIAL_DAYS, "api_key_env": API_KEY_ENV, "live_endpoint": LIVE_ENDPOINT}
+    u.update({k: v for k, v in (d.get("upgrade") or {}).items() if v is not None})
+    return u
+
+
+def paid_footer(d: dict) -> list[str]:
+    """Two-line footer: what the paid feed has this morning that the free feed does not. Counts only, no content."""
+    t = d.get("paid_teaser") or {}
+    u = upgrade_info(d)
+    if not t:
+        return [f"Public feed is delayed (D+1) and label-stamped. Same-morning, full universe, signal events: {u['url']}"]
+    sig = ",".join(t.get("signals_hidden") or [])
+    line1 = (f"🔒 Paid feed (same morning {t.get('as_of_live', '?')}): {t.get('events_hidden_today', '?')} more events today, "
+             f"{t.get('names_full_universe', '?')} names, signals {sig}.")
+    return [line1, f"   Trial {u['trial_days']} days free → {u['url']}"]
+
+
+def not_in_panel(d: dict, t: str) -> str:
+    u = upgrade_info(d)
+    return (f"{t}: Not in the free 30-name panel — full universe ({(d.get('paid_teaser') or {}).get('names_full_universe', '?')} names) "
+            f"in the paid feed → {u['url']}  (not a statement about the name)")
 
 
 def fmt(x, nd: int = 3) -> str:
@@ -96,7 +130,8 @@ def digest(d: dict, top_n: int) -> str:
         L.append("Other rule events (exploratory): " + ", ".join(f"{e['signal']} {e['asset_id']} {'+' if e.get('direction', 1) > 0 else '-'}" for e in other))
     L.append("")
     L.append(d.get("disclaimer") or DISCLAIMER)
-    L.append(f"Public feed is delayed (D+1) and label-stamped. Same-morning, full universe, signal events: {d.get('upgrade_url', UPGRADE_URL)}")
+    L.append(f"Public feed is delayed (D+1) and label-stamped [{d.get('label')}].")
+    L += paid_footer(d)
     return "\n".join(L)
 
 
@@ -106,7 +141,7 @@ def ticker_row(d: dict, ticker: str) -> str:
     L = header(d)
     L.append("")
     if row is None:
-        L.append(f"{t}: not in today's public panel (free feed covers the pilot panel only; not a statement about the name).")
+        L.append(not_in_panel(d, t))
     else:
         crowded = bool(row.get("cmci") is not None and row["cmci"] >= d.get("crowded_threshold", 0.5))
         L += [f"{row['asset_id']} {row.get('name', '')}",
@@ -125,8 +160,39 @@ def ticker_row(d: dict, ticker: str) -> str:
             L.append(f"  single-model pick:                       only {', '.join(solo)}")
     L.append("")
     L.append(DISCLAIMER)
-    L.append(f"Data date {d.get('as_of')} [{d.get('label')}]. Upgrade for same-morning data: {d.get('upgrade_url', UPGRADE_URL)}")
+    L.append(f"Data date {d.get('as_of')} [{d.get('label')}].")
+    L += paid_footer(d)
     return "\n".join(L)
+
+
+def no_key_message(d: dict) -> str:
+    u = upgrade_info(d)
+    here = os.path.dirname(os.path.abspath(__file__))
+    return "\n".join([
+        f"--live needs a paid/trial API key in env {u['api_key_env']} (not set).",
+        f"How to get a {u['trial_days']}-day trial key (free, no card):",
+        f"  1. Landing form: {u['url']}",
+        f"  2. Or draft the request email: python {os.path.join(here, 'request_trial.py')} --name ... --email ... --firm ... [--open]",
+        f"  3. Then: export {u['api_key_env']}=<key>  and re-run with --live",
+        "The key is only ever sent as an Authorization header to the live endpoint; this script never prints or stores it.",
+    ])
+
+
+def fetch_live(d: dict, key: str, ticker: str | None) -> dict | None:
+    """GET live_endpoint?ticker=… with Bearer key. None on 402/404/any connection problem (endpoint may not exist yet)."""
+    u = upgrade_info(d)
+    url = u["live_endpoint"] + (f"?{urllib.parse.urlencode({'ticker': ticker})}" if ticker else "")
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {key}", "User-Agent": "ai-bias-skill/0.2",
+                                               "Accept": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+            live = json.load(r)
+    except (urllib.error.HTTPError, urllib.error.URLError, OSError, TimeoutError, ValueError):
+        return None
+    if not isinstance(live, dict) or "as_of" not in live or "names" not in live:
+        return None
+    live.setdefault("label", "LIVE")
+    return live
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -136,8 +202,21 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ticker", default=None, help="asset_id (KRX 6-digit) or name")
     ap.add_argument("--top", type=int, default=10)
     ap.add_argument("--json", action="store_true", help="print the raw feed")
+    ap.add_argument("--live", action="store_true", help=f"same-morning paid feed; reads env {API_KEY_ENV}; exit 3 if missing")
     a = ap.parse_args(argv)
     d = load_feed(a.url, a.file)
+    if a.live:
+        key = os.environ.get(API_KEY_ENV, "").strip()
+        if not key:
+            print(no_key_message(d))
+            return 3
+        live = fetch_live(d, key, a.ticker)
+        if live is None:
+            print(LIVE_NOT_ENABLED)
+            print(f"[{d.get('label', 'DELAYED_D+1')}] free feed as_of {d.get('as_of')} follows.")
+            print()
+        else:
+            d = live
     if a.json:
         print(json.dumps(d, ensure_ascii=False, indent=1))
     elif a.ticker:

@@ -1,4 +1,4 @@
-# Bias-gap checklist — agent phrasing that stays on the measurement side
+# Bias-gap checklist (ai-bias) — agent phrasing that stays on the measurement side
 
 Run all six before answering "should I buy X?", "is X a good stock?", "what does AI think of X?". Report; do not conclude. The line: you may say what the models said, how many said it, since when, how fresh their sources were, and how noisy the day is. You may not say what the user should do, whether the name is cheap or expensive, or what will happen next.
 
@@ -42,7 +42,7 @@ Words to avoid in your own voice: buy, sell, hold, accumulate, avoid, target, up
 
 ## Putting it together — a complete answer to "should I buy 042700?"
 
-> I can't tell you whether to buy it, but I can tell you where it sits in the AI-answer landscape. On 2026-11-13 [DELAYED_D+1], Hanmi Semiconductor had CMCI 0.75: 3 of 4 consumer models listed it in their top-5 for the standard retail prompts, above the 0.5 crowding threshold. It entered the >= 3-model consensus that day (0 days prior), and today also produced an S4 crossing event — the pre-registered event type whose flow effect is being tested, with no result published yet. Cross-model agreement was 0.48; the name is shared, not a single-model pick. The sources your model cited are 50% <= 1 day old (median 4 days, HHI 0.28), so the answer leans on this morning's news. Placebo noise is within range. Public feed is D+1; same-morning data is on the paid feed.
+> I can't tell you whether to buy it, but I can tell you where it sits in the AI-answer landscape. On 2026-11-13 [DELAYED_D+1], Hanmi Semiconductor had CMCI 0.75: 3 of 4 consumer models listed it in their top-5 for the standard retail prompts, above the 0.5 crowding threshold. It entered the >= 3-model consensus that day (0 days prior), and today also produced an S4 crossing event — the pre-registered event type whose flow effect is being tested, with no result published yet. Cross-model agreement was 0.48; the name is shared, not a single-model pick. The sources your model cited are 50% <= 1 day old (median 4 days, HHI 0.28), so the answer leans on this morning's news. Placebo noise is within range. Public feed is D+1; same-morning data is on the paid feed (60-day trial).
 
 Everything in that paragraph is a number with a date. Nothing in it is a verdict.
 

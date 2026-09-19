@@ -1,4 +1,4 @@
-# Bias Hunter — methodology in one page
+# Bias Hunter (ai-bias) — methodology in one page
 
 Source of truth: the observatory's pre-registration document (frozen before the result window opens) and `docs/signals.md`. This page is a faithful abridgement for agents; when in doubt, the wording here is the conservative one.
 
@@ -47,11 +47,12 @@ For search-ON answers, publication date is inferred from the cited URL path/quer
 
 | | Free (this skill) | Paid data feed |
 |---|---|---|
-| Timing | D+1 (published the next day) or SYNTHETIC demo | Same morning, 09:00 KST |
-| Universe | Korea pilot panel (30 names) | Full universe |
+| Timing | D+1 (published the next day) or SYNTHETIC demo | Same morning, 09:00 KST (label LIVE) |
+| Universe | Korea pilot panel (30 names) | Full universe (~350 names) |
 | Tables | Digest: per-name CMCI, mention_rate, first-5, consensus, disagreement, entropy, placebo floor, S4 crossings of the day | `asset_day_llm`, `cmci_daily`, `stance_daily`, `signal_events` (S1-S5, full history), scenario panel, raw answer archive |
-| Delivery | `https://ai-bias.docenty.ai/free/latest.json` | S3/SFTP Parquet + REST, versioned schemas, quarterly methodology call, DDQ support |
-| Contact | — | https://ai-bias.docenty.ai#inquiry |
+| Delivery | `https://ai-bias.docenty.ai/free/latest.json` | REST `https://ai-bias.docenty.ai/api/v1/latest` (Bearer key, env `AI_BIAS_API_KEY`) + S3/SFTP Parquet, versioned schemas, quarterly methodology call, DDQ support |
+| Price | free | 60-day trial, then from USD 4,000 / month |
+| Contact | — | https://ai-bias.docenty.ai/#inquiry?utm_source=skill&utm_medium=cli · `scripts/request_trial.py` drafts the email |
 
 ## Free feed schema (`latest.json`, schema_version 1)
 
@@ -62,8 +63,11 @@ names[]: {asset_id, name, cmci, mention_rate, n_first5, n_models_first5, first_e
 events[]: {signal, asset_id, direction, strength}            # as_of day only
 consensus: {min_models, n_models, top[{asset_id,name,n_models,models}], union[], by_model{}, jaccard_mean, new_entrants[], dropped[], prev_date}
 disagreement[]: {model, only[]}
-entropy_bits, placebo_floor {n_placebo, sd_today, sd_30d, n_window_days}, disclaimer, upgrade_url
+entropy_bits, placebo_floor {n_placebo, sd_today, sd_30d, n_window_days}, disclaimer, upgrade_url,
+paid_teaser: {as_of_live, names_full_universe, events_hidden_today, signals_hidden[], stance_names_hidden}   # counts only, never content
+upgrade: {url, trial_days, feed_price_from_usd, api_key_env, live_endpoint}
 ```
+`paid_teaser.as_of_live` = the next trading day after `as_of`, i.e. the date the paid feed already covers when the free file is read. `events_hidden_today` = number of rule events on that day that the free feed does not show (3 planted in SYNTHETIC mode). `signals_hidden` = the signal families only the paid feed carries (S1, S2, S3, S5; the free feed shows S4 only). `latest.py` renders these as a two-line footer and `--live` uses `upgrade.live_endpoint` / `upgrade.api_key_env`.
 `first_entry_date` = start of the name's current unbroken streak in the >= 3-model consensus (null if not in consensus today). `n_models_first5` = models with at least one first-5 hit today. `cmci: null` = undetermined, never "zero consensus".
 
 `prompts.json`: `{version{catalog_version, scenario_version}, cmci_prompt_ids[], prompts[{id, ko, en, ja}], ja_machine_translated: true, scenarios{dimension: [{id, ko, en}]}}`. Korean is the measured panel; `en` is the control panel; `ja` is a machine translation for reference and is not collected.

@@ -1,13 +1,14 @@
 {
-  "name": "bias-hunter",
-  "version": "0.1.0",
-  "description": "What ChatGPT, Claude, Gemini and Grok are telling Korean retail investors today: cross-model consensus (CMCI), crowded names, model disagreement, prompt panel and citation freshness. Measurements only, never advice. Free D+1 feed from the LLM Answer Observatory.",
+  "name": "ai-bias",
+  "version": "0.2.0",
+  "description": "Bias Hunter (ai-bias): what ChatGPT, Claude, Gemini and Grok are telling Korean retail investors today. Cross-model consensus (CMCI), AI-crowded names, model disagreement, the 8-prompt retail panel (ko/en/ja) and citation freshness. Measurements only, never advice. Free D+1 feed from the LLM Answer Observatory; same-morning paid feed with a 60-day trial.",
   "author": {
     "name": "Docenty",
     "url": "https://ai-bias.docenty.ai"
   },
   "homepage": "https://ai-bias.docenty.ai",
+  "repository": "https://github.com/ctb-rebooted/ai-bias-skill",
   "license": "Evaluation use. Measurements only, not investment advice.",
-  "keywords": ["finance", "llm-bias", "korean-equities", "consensus", "market-data", "measurement"],
+  "keywords": ["ai-bias", "bias-hunter", "finance", "llm-bias", "korean-equities", "korean-stocks", "chatgpt-stock-recommendations", "consensus", "cmci", "herd-check", "citation-freshness", "market-data", "measurement", "alternative-data"],
   "skills": ["./"]
 }

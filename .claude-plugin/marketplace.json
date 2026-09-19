@@ -1,29 +1,36 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "bias-hunter-skill",
+  "name": "ai-bias-skill",
   "owner": {
     "name": "Docenty",
     "url": "https://ai-bias.docenty.ai"
   },
   "metadata": {
-    "description": "LLM Answer Observatory — free Bias Hunter skill. Measurements of what consumer LLMs tell Korean retail investors; never advice.",
-    "version": "0.1.0"
+    "description": "LLM Answer Observatory — Bias Hunter (ai-bias) free skill. Measurements of what consumer LLMs (ChatGPT, Claude, Gemini, Grok) tell Korean retail investors; AI-crowded names, cross-model consensus, citation freshness. Never advice.",
+    "version": "0.2.0"
   },
   "plugins": [
     {
-      "name": "bias-hunter",
+      "name": "ai-bias",
       "source": "./",
-      "description": "Daily 'what the models said' digest for Korean equities (CMCI consensus, crowded names, disagreement, S4 events), the 8-prompt retail panel in ko/en/ja with compare, and citation-freshness checks. Free D+1 feed; same-morning data is paid.",
-      "version": "0.1.0",
+      "description": "Bias Hunter (ai-bias): daily 'what the models said' digest for Korean equities (CMCI consensus, AI-crowded names, disagreement, S4 events), the 8-prompt retail panel in ko/en/ja with herd/contrarian compare, citation-freshness checks, and a permissioned trial-request path to the same-morning paid feed. Free D+1 feed; same-morning data is paid (60-day trial).",
+      "version": "0.2.0",
       "category": "finance",
       "keywords": [
+        "ai-bias",
+        "bias-hunter",
         "finance",
         "llm-bias",
         "korean-equities",
+        "korean-stocks",
+        "chatgpt-stock-recommendations",
         "consensus",
+        "cmci",
+        "citation-freshness",
         "measurement"
       ],
-      "homepage": "https://ai-bias.docenty.ai"
+      "homepage": "https://ai-bias.docenty.ai",
+      "repository": "https://github.com/ctb-rebooted/ai-bias-skill"
     }
   ]
 }
