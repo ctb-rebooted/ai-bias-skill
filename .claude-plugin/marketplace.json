@@ -1,0 +1,29 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "bias-hunter-skill",
+  "owner": {
+    "name": "Docenty",
+    "url": "https://ai-bias.docenty.ai"
+  },
+  "metadata": {
+    "description": "LLM Answer Observatory — free Bias Hunter skill. Measurements of what consumer LLMs tell Korean retail investors; never advice.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "bias-hunter",
+      "source": "./",
+      "description": "Daily 'what the models said' digest for Korean equities (CMCI consensus, crowded names, disagreement, S4 events), the 8-prompt retail panel in ko/en/ja with compare, and citation-freshness checks. Free D+1 feed; same-morning data is paid.",
+      "version": "0.1.0",
+      "category": "finance",
+      "keywords": [
+        "finance",
+        "llm-bias",
+        "korean-equities",
+        "consensus",
+        "measurement"
+      ],
+      "homepage": "https://ai-bias.docenty.ai"
+    }
+  ]
+}
