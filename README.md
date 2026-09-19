@@ -90,7 +90,7 @@ Every output ends with the data date, the label (`SYNTHETIC` / `DELAYED_D+1` / `
 |---|---|---|
 | Timing | D+1 | same morning, 09:00 KST |
 | Universe | Korea pilot panel, 30 names | full universe, ~350 names |
-| Events | S4 CMCI crossings of the day | S1-S5 full history, `stance_daily`, scenario panel, raw archive |
+| Events | S4 CMCI crossings of the day | S1-S5 full history, `stance_daily`, scenario panel, NDA evidence excerpts |
 | Delivery | public JSON | REST (`/api/v1/latest`, Bearer key) + S3/SFTP Parquet, versioned schemas, methodology call, DDQ |
 | Price | free | 60-day trial, then from USD 4,000 / month |
 
