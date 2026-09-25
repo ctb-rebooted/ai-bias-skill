@@ -75,7 +75,14 @@ def paid_footer(d: dict) -> list[str]:
     return [line1, f"   Trial {u['trial_days']} days free → {u['url']}"]
 
 
+SYNTHETIC_NOTE = ("The public feed currently carries SYNTHETIC demo data with placeholder ids (A00, A01, …) — no real stock is "
+                  "in it yet. Real measurements start on the first live trading day; until then no feed, free or paid, has a value "
+                  "for this name. Do not report a CMCI for it.")
+
+
 def not_in_panel(d: dict, t: str) -> str:
+    if str(d.get("label", "")).upper() == "SYNTHETIC":
+        return f"{t}: {SYNTHETIC_NOTE}"      # 데모 데이터일 때는 유료 전환을 권하지 않는다(어디에도 실데이터가 없으므로)
     u = upgrade_info(d)
     return (f"{t}: Not in the free 30-name panel — full universe ({(d.get('paid_teaser') or {}).get('names_full_universe', '?')} names) "
             f"in the paid feed → {u['url']}  (not a statement about the name)")

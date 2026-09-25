@@ -1,6 +1,6 @@
 {
   "name": "ai-bias",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Bias Hunter (ai-bias): what ChatGPT, Claude, Gemini and Grok are telling Korean retail investors today. Cross-model consensus (CMCI), AI-crowded names, model disagreement, the 8-prompt retail panel (ko/en/ja) and citation freshness. Measurements only, never advice. Free D+1 feed from the LLM Answer Observatory; same-morning paid feed with a 60-day trial.",
   "author": {
     "name": "Docenty",

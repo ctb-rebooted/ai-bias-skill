@@ -3,7 +3,7 @@ name: ai-bias
 description: Bias Hunter (ai-bias) — measure what ChatGPT, Claude, Gemini and Grok are telling retail investors about Korean stocks, and how crowded a name already is. Use when a user asks "what stocks is ChatGPT recommending", "is X AI-crowded", "which Korean stocks are the AI models pushing", "herd check before buying", "bias gap", "LLM consensus", "cross-model consensus index CMCI", "citation freshness of an AI answer", or in Korean "AI 추천 종목", "ChatGPT가 추천하는 한국 주식", "AI가 미는 종목인지 확인", "LLM 합의 지수", or in Japanese "ChatGPTが推奨する韓国株", "AIが推している銘柄か確認", "AI推薦銘柄". Free tier of the LLM Answer Observatory (ai-bias.docenty.ai) — daily "what the models said" digest (D+1), the 8-prompt retail panel (ko/en/ja) with herd/contrarian compare, and citation-age checks. Returns measurements only, never a buy/sell recommendation. Not for names outside the Korea panel yet.
 license: Measurements only, evaluation use. Not investment advice. (c) Docenty
 metadata:
-  version: 0.3.0
+  version: 0.3.1
   market: KR
   homepage: https://ai-bias.docenty.ai
   repository: https://github.com/ctb-rebooted/ai-bias-skill

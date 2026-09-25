@@ -125,6 +125,9 @@ def compare(names: list[str], feed: dict) -> dict:
 def print_compare(c: dict) -> None:
     f = lambda x: "—" if x is None else f"{x:.3f}"
     print(f"Compare vs public consensus · as_of {c['as_of']} [{c['label']}]")
+    if str(c.get("label", "")).upper() == "SYNTHETIC":
+        print("  NOTE: the public feed is SYNTHETIC demo data with placeholder ids (A00, A01, …). Real tickers cannot match it yet;")
+        print("        the herd/contrarian result below is a format demo only. Real measurements start on the first live trading day.")
     print(f"  your list ({len(c['input'])}): {', '.join(c['input'])}")
     if c["unknown"]:
         print(f"  not in public panel (unmapped, excluded from Jaccard): {', '.join(c['unknown'])}")
@@ -136,7 +139,10 @@ def print_compare(c: dict) -> None:
     print(f"  contrarian (no public model top-5):    {', '.join(c['contrarian']) or 'none'}")
     print(f"  crowded (CMCI >= 0.5) among your names: {', '.join(c['crowded_in_input']) or 'none'}")
     print()
-    print(DISCLAIMER + f" Public feed is delayed (D+1); same-morning consensus: {UPGRADE_URL}")
+    if str(c.get("label", "")).upper() == "SYNTHETIC":
+        print(DISCLAIMER)
+    else:
+        print(DISCLAIMER + f" Public feed is delayed (D+1); same-morning consensus: {UPGRADE_URL}")
 
 
 def main(argv: list[str] | None = None) -> int:
