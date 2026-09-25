@@ -7,7 +7,8 @@
     python prompt_panel.py --compare "042700,005930,000660"   # Jaccard vs today's public consensus, herd vs contrarian
     python prompt_panel.py --file prompts.json --feed-file latest.json --compare names.txt
 
-Stdlib only. Run the prompts against your own model (5 repeats, search on), take the first five names it lists,
+Stdlib only. Run the prompts against your own model (5 repeats, search on), take the first five names it presents as investment
+objects (skip customers, partners, ETF constituents, explicit exclusions — the public consensus counts the same way),
 then --compare. The compare output is a similarity measurement, not a judgement of which list is "right".
 """
 from __future__ import annotations
@@ -67,7 +68,9 @@ def print_prompts(p: dict, lang: str, dimension: str | None) -> None:
             miss = "" if q.get(lang) else f"  [no {lang}; showing {'en' if q.get('en') else 'ko'}]"
             print(f"  {q['id']}  {text}{miss}")
     print()
-    print("How to use: ask your model each string verbatim, 5 repeats, web search on. Record the first five names per answer.")
+    print("How to use: ask your model each string verbatim, 5 repeats, web search on. Record the first five names per answer that the answer")
+    print("presents as investment objects. Skip names that appear only as another company's customer/capex source, a partner, an ETF or index")
+    print("constituent, an explicit exclusion or a hypothetical — the public consensus excludes them; counting them overstates mega-caps ~2x.")
     print("Then: python prompt_panel.py --compare \"name1,name2,...\"  (or a file / '-' for stdin)")
 
 

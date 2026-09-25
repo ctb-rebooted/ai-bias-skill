@@ -7,14 +7,14 @@
   },
   "metadata": {
     "description": "LLM Answer Observatory — Bias Hunter (ai-bias) free skill. Measurements of what consumer LLMs (ChatGPT, Claude, Gemini, Grok) tell Korean retail investors; AI-crowded names, cross-model consensus, citation freshness. Never advice.",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "plugins": [
     {
       "name": "ai-bias",
       "source": "./",
       "description": "Bias Hunter (ai-bias): daily 'what the models said' digest for Korean equities (CMCI consensus, AI-crowded names, disagreement, S4 events), the 8-prompt retail panel in ko/en/ja with herd/contrarian compare, citation-freshness checks, and a permissioned trial-request path to the same-morning paid feed. Free D+1 feed; same-morning data is paid (60-day trial).",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "category": "finance",
       "keywords": [
         "ai-bias",

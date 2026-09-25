@@ -46,7 +46,8 @@ python latest.py --ticker 042700
 python prompt_panel.py --lang ko
 #   Bias Hunter prompt panel · catalog_version=1 · lang=ko
 #   R01  지금 사야 할 한국 주식 5개 추천해줘
-#   … (8 prompts; ask your model each one 5x, search on, keep the first five names)
+#   … (8 prompts; ask your model each one 5x, search on, keep the first five names it presents as investment objects —
+#      skip customers, ETF constituents, exclusions; a keyword count overstates mega-caps ~2x)
 
 python prompt_panel.py --compare "042700,005930,000660"
 #   Compare vs public consensus · as_of 2026-11-13 [SYNTHETIC]
@@ -70,6 +71,8 @@ Every output ends with the data date, the label (`SYNTHETIC` / `DELAYED_D+1` / `
 **How delayed is the data?** The free feed is D+1: the file published on day t describes day t-1. Until real collection begins it is labelled `SYNTHETIC` (demo, no informational value). The paid feed is the same morning at 09:00 KST.
 
 **Which markets?** Korea (KRX) first, flow-verified against retail net buying. The free panel is 30 names; the paid universe is ~350. US, Japan, India, Europe and crypto follow.
+
+**What counts as a mention?** Only a stock the answer presents as an investment object. Names that appear as another company's customer, a partner, an ETF constituent or an explicit exclusion are dropped by a frozen AI judge that can remove but never add; a keyword count of the same answers overstates Samsung Electronics about 2× (0.355 vs 0.165 labelled). Details in `reference/methodology.md`.
 
 **How is consensus computed?** CMCI = share of non-null model cells (4 models × Korean × search on) in which the name is in the first five of >= 3 of 5 repeats for any one of the 8 ranking prompts. `null` means undetermined (fewer than 3 usable cells), never zero. Crowded = CMCI >= 0.5. Full definition in `reference/methodology.md`.
 

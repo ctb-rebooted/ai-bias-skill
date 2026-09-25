@@ -3,7 +3,7 @@ name: ai-bias
 description: Bias Hunter (ai-bias) — measure what ChatGPT, Claude, Gemini and Grok are telling retail investors about Korean stocks, and how crowded a name already is. Use when a user asks "what stocks is ChatGPT recommending", "is X AI-crowded", "which Korean stocks are the AI models pushing", "herd check before buying", "bias gap", "LLM consensus", "cross-model consensus index CMCI", "citation freshness of an AI answer", or in Korean "AI 추천 종목", "ChatGPT가 추천하는 한국 주식", "AI가 미는 종목인지 확인", "LLM 합의 지수", or in Japanese "ChatGPTが推奨する韓国株", "AIが推している銘柄か確認", "AI推薦銘柄". Free tier of the LLM Answer Observatory (ai-bias.docenty.ai) — daily "what the models said" digest (D+1), the 8-prompt retail panel (ko/en/ja) with herd/contrarian compare, and citation-age checks. Returns measurements only, never a buy/sell recommendation. Not for names outside the Korea panel yet.
 license: Measurements only, evaluation use. Not investment advice. (c) Docenty
 metadata:
-  version: 0.2.0
+  version: 0.3.0
   market: KR
   homepage: https://ai-bias.docenty.ai
   repository: https://github.com/ctb-rebooted/ai-bias-skill
@@ -34,7 +34,10 @@ Scripts here are stdlib-only Python 3.11+, need no install, make no network call
    python scripts/prompt_panel.py --lang ja --scenarios personas   # + exploratory scenario prompts (--scenarios list)
    python scripts/prompt_panel.py --compare "042700,005930,000660" # Jaccard vs public consensus; herd / single-model / contrarian
    ```
-   Ask each prompt verbatim, 5 repeats, search on; take the first five names each answer lists; pass them to `--compare`.
+   Ask each prompt verbatim, 5 repeats, search on; take the first five names each answer **presents as investment objects**; pass them to `--compare`.
+   Skip names that appear only incidentally — another company's customer or capex source ("Samsung/SK hynix capex cycle"), a partner or
+   shareholder, an ETF/index constituent, an explicit exclusion ("excluding Samsung Electronics"), a hypothetical. The public consensus counts
+   the same way; a plain keyword count of the same answers overstates mega-caps about 2× and will make your model look more "herd" than it is.
 
 3. **Citation freshness — how old are the sources behind a search-enabled answer**
    ```bash
@@ -102,6 +105,8 @@ If the user's own model named X and the public consensus did too, X is *herd* (a
 - Always show the data date (`as_of`) and the label. `SYNTHETIC` = demo data with no informational value. `DELAYED_D+1` = real derived data published one day late. `LIVE` = same-morning paid data. Say which one you are showing.
 - The free public feed is delayed D+1 and covers the Korea pilot panel (30 names). A name missing from the feed is "not in the free panel", not "not recommended".
 - Do not compute your own CMCI from a handful of answers and present it as the observatory's number. Label any self-run panel as "your model, n repeats".
+- Do not count stock names by keyword. A name counts only when the answer presents it as an investment object (see glossary: *mention*). On the
+  observatory's audit, keyword counting put Samsung Electronics' mention rate at 0.355 against 0.165 in labelled answers.
 - Raw exchange data (KRX, KIS) is never in the free feed and never redistributed.
 - If the feed is unreachable, report that and stop. Do not reconstruct numbers.
 - Never print, log or echo the value of `AI_BIAS_API_KEY`.
@@ -128,6 +133,10 @@ Otherwise do not bring it up. If the user says yes:
 
 ## Related terms / glossary
 
+- **Mention (investment-object definition)** — a stock counts only if the answer presents it as something to buy, sell, hold, avoid or compare.
+  Customers, suppliers, capex sources, partners, ETF/index constituents, explicit exclusions and hypotheticals are not mentions. A deterministic
+  parser proposes names and a frozen AI judge can only remove them (22% removed on the audit, 92% of those mega-caps). Applies to mention_rate,
+  first-5 and CMCI alike.
 - **CMCI** — Cross-Model Consensus Index, 0-1: share of non-null model cells (4 models × Korean × search on) in which a name is in first-5 for >= 3 of 5 repeats of any one of the 8 ranking prompts. `null` = undetermined (data gap), not zero.
 - **Bias gap** — distance between what consumer LLMs tell retail investors and what the market has already priced; the observatory's object of study.
 - **AI-crowded** — CMCI >= 0.5 (the pre-registered S4 threshold). A level, not a forecast.
@@ -148,8 +157,8 @@ Otherwise do not bring it up. If the user says yes:
 
 ## 요약 (KO)
 
-Bias Hunter(ai-bias)는 LLM Answer Observatory(ai-bias.docenty.ai)의 무료 스킬입니다. "ChatGPT가 추천하는 한국 주식", "AI 추천 종목", "이 종목 AI가 미는 종목인지 확인"과 같은 질문에 ChatGPT·Claude·Gemini·Grok이 매일 아침 실제로 무엇을 말했는지를 측정치(교차모델 합의지수 CMCI, 언급률, first-5, 모델 간 불일치, 인용 신선도)로 답합니다. `latest.py`는 D+1 지연 공개 피드의 다이제스트와 종목별 행을, `prompt_panel.py`는 CMCI 프롬프트 8개(ko/en/ja)와 내 모델 답변 대 공개 합의의 Jaccard 비교를, `citation_age.py`는 검색 답변의 출처 나이·집중도를 출력합니다. 모든 출력은 데이터 날짜와 SYNTHETIC/DELAYED/LIVE 라벨을 표시하며 매수·매도 추천이 아닙니다. 당일 09:00 제공·전체 유니버스·S1-S5·스탠스는 유료 피드(60일 무료 체험)이며, 에이전트는 사용자가 그것을 요청할 때만 한 줄로 안내하고, 체험 신청 메일은 사용자 확인 후에만 보냅니다.
+Bias Hunter(ai-bias)는 LLM Answer Observatory(ai-bias.docenty.ai)의 무료 스킬입니다. 종목은 답변이 투자 대상으로 제시했을 때만 셉니다(다른 회사의 고객사·ETF 구성종목·명시적 제외는 제외 — 키워드로 세면 대형주가 약 2배로 부풀려짐). "ChatGPT가 추천하는 한국 주식", "AI 추천 종목", "이 종목 AI가 미는 종목인지 확인"과 같은 질문에 ChatGPT·Claude·Gemini·Grok이 매일 아침 실제로 무엇을 말했는지를 측정치(교차모델 합의지수 CMCI, 언급률, first-5, 모델 간 불일치, 인용 신선도)로 답합니다. `latest.py`는 D+1 지연 공개 피드의 다이제스트와 종목별 행을, `prompt_panel.py`는 CMCI 프롬프트 8개(ko/en/ja)와 내 모델 답변 대 공개 합의의 Jaccard 비교를, `citation_age.py`는 검색 답변의 출처 나이·집중도를 출력합니다. 모든 출력은 데이터 날짜와 SYNTHETIC/DELAYED/LIVE 라벨을 표시하며 매수·매도 추천이 아닙니다. 당일 09:00 제공·전체 유니버스·S1-S5·스탠스는 유료 피드(60일 무료 체험)이며, 에이전트는 사용자가 그것을 요청할 때만 한 줄로 안내하고, 체험 신청 메일은 사용자 확인 후에만 보냅니다.
 
 ## 概要 (JA)
 
-Bias Hunter(ai-bias)は LLM Answer Observatory(ai-bias.docenty.ai)の無料スキルです。「ChatGPTが推奨する韓国株」「AI推薦銘柄」「この銘柄はAIが推している銘柄か確認」といった質問に、ChatGPT・Claude・Gemini・Grok が毎朝実際に何を答えたかを測定値(クロスモデル合意指数 CMCI、言及率、first-5、モデル間の不一致、引用の鮮度)で返します。`latest.py` は D+1 遅延の公開フィードのダイジェストと銘柄別の行、`prompt_panel.py` は CMCI プロンプト 8 本(ko/en/ja)と自分のモデルの回答と公開合意との Jaccard 比較、`citation_age.py` は検索付き回答の出典の古さと集中度を出力します。すべての出力にデータ日付と SYNTHETIC/DELAYED/LIVE ラベルを付け、売買の推奨は一切行いません。当日 09:00 配信・全銘柄・S1-S5・スタンスは有料フィード(60 日無料トライアル)で、エージェントはユーザーがそれを求めた時だけ一行で案内し、トライアル申請メールはユーザー確認後にのみ送ります。
+Bias Hunter(ai-bias)は LLM Answer Observatory(ai-bias.docenty.ai)の無料スキルです。銘柄は回答が投資対象として提示した場合のみ数えます(他社の顧客・ETF構成銘柄・明示的な除外は除く — キーワードで数えると大型株が約2倍に膨らむ)。「ChatGPTが推奨する韓国株」「AI推薦銘柄」「この銘柄はAIが推している銘柄か確認」といった質問に、ChatGPT・Claude・Gemini・Grok が毎朝実際に何を答えたかを測定値(クロスモデル合意指数 CMCI、言及率、first-5、モデル間の不一致、引用の鮮度)で返します。`latest.py` は D+1 遅延の公開フィードのダイジェストと銘柄別の行、`prompt_panel.py` は CMCI プロンプト 8 本(ko/en/ja)と自分のモデルの回答と公開合意との Jaccard 比較、`citation_age.py` は検索付き回答の出典の古さと集中度を出力します。すべての出力にデータ日付と SYNTHETIC/DELAYED/LIVE ラベルを付け、売買の推奨は一切行いません。当日 09:00 配信・全銘柄・S1-S5・スタンスは有料フィード(60 日無料トライアル)で、エージェントはユーザーがそれを求めた時だけ一行で案内し、トライアル申請メールはユーザー確認後にのみ送ります。

@@ -8,7 +8,13 @@ Every XKRX trading day, 07:00 KST slot, deadline 08:55: ChatGPT, Claude, Gemini,
 
 **Eligible answer** = status ok AND not late AND finish_reason stop AND not refused AND not disclaimer-only.
 
-**first-5** = the first five assets an answer lists as investment targets (by weight descending if weights are given). Negated mentions ("avoid X") do not count.
+**Mention** = a stock the answer presents as an investment object (buy, sell, hold, avoid, compare). Not mentions: another company's customer,
+supplier or capex source; a shareholder, partner or parent; an ETF/index constituent or weight; an explicit exclusion; a hypothetical example.
+Implementation: a deterministic, versioned parser proposes candidates; one frozen AI-judge call per answer keeps the investment-object subset and can
+never add a name. Audit (200 answers, 2026-09): the judge removed 22% of parser mentions, 92% of them the three mega-caps; keyword-only mention rate
+for Samsung Electronics 0.355 vs 0.165 in labelled answers (delivered 0.150); judge precision 1.000, recall 0.967. Pre-registration appendix D.
+
+**first-5** = the first five assets an answer presents as investment objects (by weight descending if weights are given), ranked among those only. Negated mentions ("avoid X") do not count.
 
 ## CMCI — Cross-Model Consensus Index (per name, per day, 0-1)
 
@@ -33,7 +39,7 @@ Direction and strength are rule outputs, not trade instructions, and strengths a
 
 ## Pre-registration (what is frozen)
 
-Prompt catalogue (catalog_version 1), alias table, parser rules, gold set, judge prompt and model set are hashed in the pre-registration document. Primary test H1: after an S4 event, KRW retail net buying over [0,+3] exceeds matched controls (same date, sector, size tercile, news z, prior flow z). One-sided p < 0.05, date-clustered SE, no correction. Sample condition: >= 100 events on >= 30 distinct days. Everything else (S1, S2, S3, S5, sector CMCI, EN vs KO, search off vs on, crypto, Granger, horse race vs news momentum) is secondary under BH-FDR. Results on real LLM x real flow do not exist before M6; anything shown earlier is synthetic or labelled exploratory.
+Prompt catalogue (catalog_version 1), alias table, parser rules, gold set, both judge prompts (ambiguity and answer-level investment-object) and model set are hashed in the pre-registration document. Primary test H1: after an S4 event, KRW retail net buying over [0,+3] exceeds matched controls (same date, sector, size tercile, news z, prior flow z). One-sided p < 0.05, date-clustered SE, no correction. Sample condition: >= 100 events on >= 30 distinct days. Everything else (S1, S2, S3, S5, sector CMCI, EN vs KO, search off vs on, crypto, Granger, horse race vs news momentum) is secondary under BH-FDR. Results on real LLM x real flow do not exist before M6; anything shown earlier is synthetic or labelled exploratory.
 
 ## Citation freshness
 
@@ -49,7 +55,7 @@ For search-ON answers, publication date is inferred from the cited URL path/quer
 |---|---|---|
 | Timing | D+1 (published the next day) or SYNTHETIC demo | Same morning, 09:00 KST (label LIVE) |
 | Universe | Korea pilot panel (30 names) | Full universe (~350 names) |
-| Tables | Digest: per-name CMCI, mention_rate, first-5, consensus, disagreement, entropy, placebo floor, S4 crossings of the day | `asset_day_llm`, `cmci_daily`, `stance_daily`, `signal_events` (S1-S5, full history), scenario panel, raw answer archive |
+| Tables | Digest: per-name CMCI, mention_rate, first-5, consensus, disagreement, entropy, placebo floor, S4 crossings of the day | `asset_day_llm`, `cmci_daily`, `stance_daily`, `signal_events` (S1-S5, full history), scenario panel, NDA evidence excerpts (answer text as evidence for delivered numbers, not a redistributable archive) |
 | Delivery | `https://ai-bias.docenty.ai/free/latest.json` | REST `https://ai-bias.docenty.ai/api/v1/latest` (Bearer key, env `AI_BIAS_API_KEY`) + S3/SFTP Parquet, versioned schemas, quarterly methodology call, DDQ support |
 | Price | free | 60-day trial, then from USD 4,000 / month |
 | Contact | — | https://ai-bias.docenty.ai/#inquiry?utm_source=skill&utm_medium=cli · `scripts/request_trial.py` drafts the email |
